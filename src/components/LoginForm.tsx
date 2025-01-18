@@ -4,12 +4,7 @@ import { TextField } from "react-aria-components";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { useAuthStore } from "../utils/mall";
-import {
-  redirect,
-  useNavigate,
-  useRouter,
-  useStableCallback,
-} from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 export const LoginForm: React.FC = () => {
   const logIn = useAuthStore((s) => s.logIn);

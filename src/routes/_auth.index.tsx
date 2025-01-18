@@ -25,6 +25,8 @@ function RouteComponent() {
 
   const colors = ["red", "blue", "purple"];
 
+  const [numBusses, setNumBusses] = useState<number>(1);
+
   const [markers, setMarkers] = useState<PositionType[]>([]);
   const [dirServ, setDirServ] = useState<google.maps.DirectionsService>();
   const [distMat, setDistMat] = useState<google.maps.DistanceMatrixService>();
@@ -111,6 +113,16 @@ function RouteComponent() {
           ))}
         </GoogleMap>
         <div className="flex flex-col h-screen w-[20%] gap-5 p-3 items-center">
+          <div>
+            <label className="text-stone-200">Number of busses</label>
+            <input
+              type="number"
+              value={numBusses}
+              onChange={(e) => setNumBusses(e.currentTarget.valueAsNumber)}
+              className="focus:outline-none p-2 rounded-md bg-stone-600 focus:bg-stone-700 w-full"
+            />
+          </div>
+
           <button
             className="bg-green-800 p-2 rounded-md hover:bg-green-900 transition-colors"
             disabled={!dirServ || !geometry || !distMat}
@@ -152,6 +164,7 @@ function RouteComponent() {
               logOut();
               router.invalidate();
             }}
+            className="bg-stone-600 p-3 w-full rounded-md hover:bg-stone-700"
           >
             Log Out
           </button>
