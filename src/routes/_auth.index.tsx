@@ -222,9 +222,23 @@ function RouteComponent() {
             className="bg-slate-500 p-2 rounded-md hover:bg-slate-600 transition-colors"
             disabled={!paths}
             onClick={async () => {
+              const stops = paths!.map((path) => {
+                const pathStops: { loc: PositionType, name: string }[] = [];
+                for (let i = 0; i < path.directions.length; i++) {
+                  pathStops.push({
+                    loc: path.stops[i],
+                    name: path.directions[i].routes[0].legs[0].start_address
+                  });
+                }
+                pathStops.push({
+                  loc: path.stops[path.stops.length - 1],
+                  name: path.directions[path.directions.length - 1].routes[0].legs[0].end_address
+                });
+                return pathStops;
+              });
               fetch(`${import.meta.env.VITE_BACKEND_URL}/routes`, {
                 method: "POST",
-                body: JSON.stringify(paths!.map((path) => path.stops)),
+                body: JSON.stringify(stops),
               });
             }}
           >
