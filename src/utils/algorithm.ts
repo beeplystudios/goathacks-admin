@@ -9,7 +9,7 @@ export interface Path {
   dist: number;
 };
 
-const hashLatLng = (pos: PositionType): string => {
+export const hashLatLng = (pos: PositionType): string => {
   return `${pos.lat},${pos.lng}`;
 };
 

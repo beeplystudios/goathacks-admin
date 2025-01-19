@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import {
   connectPaths,
   generateRoute,
+  hashLatLng,
   Path,
   PositionType,
 } from "../utils/algorithm";
@@ -65,6 +66,23 @@ function RouteComponent() {
       setDistMat(new routes.DistanceMatrixService());
     }
   }, [routes, map]);
+
+  useEffect(() => {
+    if (dirServ && distMat && geometry) {
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/routes`, {
+
+      })
+        .then((res) => res.json())
+        .then(async (data: PositionType[][]) => {
+          const dict = new Map<string, PositionType>();
+          data.flat().forEach((point) => {
+            dict.set(hashLatLng(point), point);
+          })
+          setPaths(await connectPaths(dirServ, await generateRoute(dirServ, distMat, geometry, [...dict.values()])));
+          setMarkers([...dict.values()]);
+        });
+    }
+  }, [dirServ, distMat, geometry]);
 
   useEffect(() => {
     if (paths && routes) {
@@ -188,6 +206,17 @@ function RouteComponent() {
               );
             }}>
             Generate Route
+          </button>
+          <button
+            className="bg-slate-500 p-2 rounded-md hover:bg-slate-600 transition-colors"
+            disabled={!paths}
+            onClick={async () => {
+              fetch(`${import.meta.env.VITE_BACKEND_URL}/routes`, {
+                method: "POST",
+                body: JSON.stringify(paths!.map((path) => path.stops))
+              });
+            }}>
+            Save Current Route
           </button>
 
           <div className="flex-1" />
