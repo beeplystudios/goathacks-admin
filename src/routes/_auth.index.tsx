@@ -8,7 +8,24 @@ import {
   useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
-import { connectPaths, generateRoute, Path, PositionType } from "../utils/algorithm";
+import {
+  connectPaths,
+  generateRoute,
+  Path,
+  PositionType,
+} from "../utils/algorithm";
+import { QrCodeIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/Modal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/Tabs";
+
+import QRCode from "react-qr-code";
 
 export const Route = createFileRoute("/_auth/")({
   component: RouteComponent,
@@ -35,6 +52,8 @@ function RouteComponent() {
   >([]);
   const [paths, setPaths] = useState<Path[]>();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [newBusUUID, setNewBusUUID] = useState("");
+  const [newDriverUUID, setNewDriverUUID] = useState("");
 
   const routes = useMapsLibrary("routes");
   const geometry = useMapsLibrary("geometry");
@@ -51,7 +70,7 @@ function RouteComponent() {
     if (paths && routes) {
       // console.log(paths.map((path) => [path.stops, path.directions.map((dir) => ({
       //    // origin: dir.request.origin, dest: dir.request.destination }))]));
-      //   origin: { lat: (dir.request.origin as unknown).location.lat(), lng: (dir.request.origin as unknown).location.lng() }, 
+      //   origin: { lat: (dir.request.origin as unknown).location.lat(), lng: (dir.request.origin as unknown).location.lng() },
       //   dest: { lat: (dir.request.destination as unknown).location.lat(), lng: (dir.request.destination as unknown).location.lng() }}))]));
       let dirRendIdx = 0;
       paths.forEach((path, path_idx) => {
@@ -82,6 +101,21 @@ function RouteComponent() {
     }
   }, [paths, routes, map]);
 
+  const createBusUUID = () => {
+    const uuid = crypto.randomUUID();
+    setNewBusUUID(uuid);
+    // DASHIELL DO DATABASE
+    return uuid;
+  };
+
+  const createDriverUUID = () => {
+    const uuid = crypto.randomUUID();
+    setNewDriverUUID(uuid);
+    // DASHIELL DO DATABASE
+    console.log(uuid);
+    return uuid;
+  };
+
   return (
     <div>
       <div className="flex flex-row gap-2">
@@ -107,8 +141,7 @@ function RouteComponent() {
             setMarkers(
               e.detail.latLng ? [...markers, e.detail.latLng] : markers
             );
-          }}
-        >
+          }}>
           {markers.map((m, i) => (
             <AdvancedMarker
               position={m}
@@ -123,8 +156,7 @@ function RouteComponent() {
                   lng: e.latLng!.lng(),
                 };
                 setMarkers([...markers]);
-              }}
-            >
+              }}>
               <Pin
                 background={selectedIdx === i ? "forestGreen" : "red"}
                 glyphColor={selectedIdx === i ? "darkGreen" : "fireBrick"}
@@ -149,10 +181,12 @@ function RouteComponent() {
             disabled={!dirServ || !geometry || !distMat}
             onClick={async () => {
               setPaths(
-                await connectPaths(dirServ!, await generateRoute(dirServ!, distMat!, geometry!, markers))
+                await connectPaths(
+                  dirServ!,
+                  await generateRoute(dirServ!, distMat!, geometry!, markers)
+                )
               );
-            }}
-          >
+            }}>
             Generate Route
           </button>
 
@@ -172,21 +206,77 @@ function RouteComponent() {
                       ...markers.slice(selectedIdx! + 1, markers.length),
                     ]);
                     setSelectedIdx(null);
-                  }}
-                >
+                  }}>
                   Delete Selected
                 </button>
               </center>
             </div>
           )}
+          <Dialog>
+            <DialogTrigger className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2">
+              <QrCodeIcon />
+              Generate QR Code
+            </DialogTrigger>
+            <DialogContent className="bg-stone-900 border-0">
+              <Tabs defaultValue="bus" className="w-[400px]">
+                <TabsList className="grid w-full grid-cols-2 bg-white/10">
+                  <TabsTrigger
+                    value="bus"
+                    className="data-[state=active]:bg-stone-900">
+                    Bus
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="driver"
+                    className="data-[state=active]:bg-stone-900">
+                    Driver
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="bus" className="p-2">
+                  {newBusUUID ? (
+                    <>
+                      <h2 className="font-semibold text-lg mt-2">
+                        New Bus QR code
+                      </h2>
+                      <div className="rounded-2xl flex items-center justify-center mt-12 w-fit bg-white/10 p-4 mr-auto ml-auto">
+                        <QRCode value={newBusUUID} className="rounded-lg" />
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      onClick={createBusUUID}
+                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2">
+                      Get new QR Code
+                    </button>
+                  )}
+                </TabsContent>
+                <TabsContent value="driver" className="p-2">
+                  {newDriverUUID ? (
+                    <>
+                      <h2 className="font-semibold text-lg mt-2">
+                        New Driver QR code
+                      </h2>
+                      <div className="rounded-2xl flex items-center justify-center mt-12 w-fit bg-white/10 p-4 mr-auto ml-auto">
+                        <QRCode value={newDriverUUID} className="rounded-lg" />
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      onClick={createDriverUUID}
+                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2">
+                      Get new QR Code
+                    </button>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </DialogContent>
+          </Dialog>
 
           <button
             onClick={() => {
               logOut();
               router.invalidate();
             }}
-            className="bg-stone-600 p-3 w-full rounded-md hover:bg-stone-700"
-          >
+            className="bg-stone-600 p-3 w-full rounded-md hover:bg-stone-700">
             Log Out
           </button>
         </div>
