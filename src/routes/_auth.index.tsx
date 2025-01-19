@@ -52,6 +52,8 @@ function RouteComponent() {
   >([]);
   const [paths, setPaths] = useState<Path[]>();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [newBusUUID, setNewBusUUID] = useState("");
+  const [newDriverUUID, setNewDriverUUID] = useState("");
 
   const routes = useMapsLibrary("routes");
   const geometry = useMapsLibrary("geometry");
@@ -68,7 +70,7 @@ function RouteComponent() {
     if (paths && routes) {
       // console.log(paths.map((path) => [path.stops, path.directions.map((dir) => ({
       //    // origin: dir.request.origin, dest: dir.request.destination }))]));
-      //   origin: { lat: (dir.request.origin as unknown).location.lat(), lng: (dir.request.origin as unknown).location.lng() }, 
+      //   origin: { lat: (dir.request.origin as unknown).location.lat(), lng: (dir.request.origin as unknown).location.lng() },
       //   dest: { lat: (dir.request.destination as unknown).location.lat(), lng: (dir.request.destination as unknown).location.lng() }}))]));
       let dirRendIdx = 0;
       paths.forEach((path, path_idx) => {
@@ -98,6 +100,21 @@ function RouteComponent() {
       setDirRenderers(dirRenderers);
     }
   }, [paths, routes, map]);
+
+  const createBusUUID = () => {
+    const uuid = crypto.randomUUID();
+    setNewBusUUID(uuid);
+    // DASHIELL DO DATABASE
+    return uuid;
+  };
+
+  const createDriverUUID = () => {
+    const uuid = crypto.randomUUID();
+    setNewDriverUUID(uuid);
+    // DASHIELL DO DATABASE
+    console.log(uuid);
+    return uuid;
+  };
 
   return (
     <div>
@@ -215,20 +232,40 @@ function RouteComponent() {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="bus" className="p-2">
-                  <h2 className="font-semibold text-lg mt-2">
-                    New Bus QR code
-                  </h2>
-                  <div className="rounded-2xl flex items-center justify-center mt-12 w-fit bg-white/10 p-4 mr-auto ml-auto">
-                    <QRCode value="bus number two" className="rounded-lg" />
-                  </div>
+                  {newBusUUID ? (
+                    <>
+                      <h2 className="font-semibold text-lg mt-2">
+                        New Bus QR code
+                      </h2>
+                      <div className="rounded-2xl flex items-center justify-center mt-12 w-fit bg-white/10 p-4 mr-auto ml-auto">
+                        <QRCode value={newBusUUID} className="rounded-lg" />
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      onClick={createBusUUID}
+                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2">
+                      Get new QR Code
+                    </button>
+                  )}
                 </TabsContent>
                 <TabsContent value="driver" className="p-2">
-                  <h2 className="font-semibold text-lg mt-2">
-                    New Bus Driver QR code
-                  </h2>
-                  <div className="rounded-2xl flex items-center justify-center mt-12 w-fit bg-white/10 p-4 mr-auto ml-auto">
-                    <QRCode value="new bus driver" className="rounded-lg" />
-                  </div>
+                  {newDriverUUID ? (
+                    <>
+                      <h2 className="font-semibold text-lg mt-2">
+                        New Driver QR code
+                      </h2>
+                      <div className="rounded-2xl flex items-center justify-center mt-12 w-fit bg-white/10 p-4 mr-auto ml-auto">
+                        <QRCode value={newDriverUUID} className="rounded-lg" />
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      onClick={createDriverUUID}
+                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2">
+                      Get new QR Code
+                    </button>
+                  )}
                 </TabsContent>
               </Tabs>
             </DialogContent>
