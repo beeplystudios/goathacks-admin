@@ -49,6 +49,10 @@ function RouteComponent() {
 
   useEffect(() => {
     if (paths && routes) {
+      // console.log(paths.map((path) => [path.stops, path.directions.map((dir) => ({
+      //    // origin: dir.request.origin, dest: dir.request.destination }))]));
+      //   origin: { lat: (dir.request.origin as unknown).location.lat(), lng: (dir.request.origin as unknown).location.lng() }, 
+      //   dest: { lat: (dir.request.destination as unknown).location.lat(), lng: (dir.request.destination as unknown).location.lng() }}))]));
       let dirRendIdx = 0;
       paths.forEach((path, path_idx) => {
         path.directions.forEach((direction) => {
@@ -65,7 +69,7 @@ function RouteComponent() {
           dirRenderers[dirRendIdx].setDirections(direction);
           dirRenderers[dirRendIdx++].setOptions({
             polylineOptions: {
-              strokeColor: colors[path_idx],
+              strokeColor: colors[path_idx % colors.length],
               strokeOpacity: 0.5,
             },
           });

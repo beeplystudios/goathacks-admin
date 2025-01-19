@@ -232,7 +232,15 @@ export const generateRoute = async (
   const totalPathPoints = steps.reduce((acc, step) => acc + step.path.length, 0);
   const OVERLAP_THRESHOLD = 0.25; // If the ratio of overlaps to points is >= OVERLAP_THRESHOLD, split
 
-  if (points.length > 4 && intersections / totalPathPoints >= OVERLAP_THRESHOLD) {
+  const LENGTH_THRESHOLD = 1.75;
+
+  if (
+    points.length > 4 &&
+    (
+      intersections / totalPathPoints >= OVERLAP_THRESHOLD ||
+      minDist / await getDistance(dirServ, bestStops[0], bestStops[bestStops.length - 1]) >= LENGTH_THRESHOLD
+    )
+  ) {
     // Generate multiple maps
     const coords = points.map((p) => [p.lat, p.lng]);
     const [m, b] = linearRegression(coords);
