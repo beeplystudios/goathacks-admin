@@ -8,7 +8,7 @@ import {
   useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
-import { generateRoute, Path, PositionType } from "../utils/algorithm";
+import { connectPaths, generateRoute, Path, PositionType } from "../utils/algorithm";
 
 export const Route = createFileRoute("/_auth/")({
   component: RouteComponent,
@@ -33,7 +33,7 @@ function RouteComponent() {
   const [dirRenderers, setDirRenderers] = useState<
     google.maps.DirectionsRenderer[]
   >([]);
-  const [path, setPath] = useState<Path>();
+  const [paths, setPaths] = useState<Path[]>();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   const routes = useMapsLibrary("routes");
@@ -48,18 +48,35 @@ function RouteComponent() {
   }, [routes, map]);
 
   useEffect(() => {
-    if (path) {
-      path.directions.forEach((direction, i) => {
-        dirRenderers[i].setDirections(direction);
-        dirRenderers[i].setOptions({
-          polylineOptions: {
-            strokeColor: colors[i % colors.length],
-            strokeOpacity: 0.5,
-          },
+    if (paths && routes) {
+      let dirRendIdx = 0;
+      paths.forEach((path, path_idx) => {
+        path.directions.forEach((direction) => {
+          if (dirRendIdx === dirRenderers.length) {
+            dirRenderers.push(
+              new routes.DirectionsRenderer({
+                map,
+                preserveViewport: true,
+                suppressMarkers: true,
+              })
+            );
+          }
+          dirRenderers[dirRendIdx].setMap(map);
+          dirRenderers[dirRendIdx].setDirections(direction);
+          dirRenderers[dirRendIdx++].setOptions({
+            polylineOptions: {
+              strokeColor: colors[path_idx],
+              strokeOpacity: 0.5,
+            },
+          });
         });
       });
+      for (let i = dirRendIdx; i < dirRenderers.length; i++) {
+        dirRenderers[i].setMap(null);
+      }
+      setDirRenderers(dirRenderers);
     }
-  }, [path]);
+  }, [paths, routes, map]);
 
   return (
     <div>
@@ -127,8 +144,8 @@ function RouteComponent() {
             className="bg-green-800 p-2 rounded-md hover:bg-green-900 transition-colors"
             disabled={!dirServ || !geometry || !distMat}
             onClick={async () => {
-              setPath(
-                await generateRoute(dirServ!, distMat!, geometry!, markers)
+              setPaths(
+                await connectPaths(dirServ!, await generateRoute(dirServ!, distMat!, geometry!, markers))
               );
             }}
           >
