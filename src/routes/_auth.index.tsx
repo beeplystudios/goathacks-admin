@@ -195,7 +195,7 @@ function RouteComponent() {
           ))}
         </GoogleMap>
         <div className="flex flex-col h-screen w-[20%] gap-5 p-3 items-center">
-          <div>
+          {/*<div>
             <label className="text-stone-200">Number of buses</label>
             <input
               type="number"
@@ -203,7 +203,7 @@ function RouteComponent() {
               onChange={(e) => setNumBuses(e.currentTarget.valueAsNumber)}
               className="focus:outline-none p-2 rounded-md bg-stone-600 focus:bg-stone-700 w-full"
             />
-          </div>
+          </div>*/}
 
           <button
             className="bg-green-800 p-2 rounded-md hover:bg-green-900 transition-colors"
