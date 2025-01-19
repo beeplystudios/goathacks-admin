@@ -53,8 +53,8 @@ function RouteComponent() {
   >([]);
   const [paths, setPaths] = useState<Path[]>();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const [newBusUUID, setNewBusUUID] = useState("");
-  const [newDriverUUID, setNewDriverUUID] = useState("");
+  const [newBusKey, setNewBusKey] = useState("");
+  const [newDriverKey, setNewDriverKey] = useState("");
 
   const routes = useMapsLibrary("routes");
   const geometry = useMapsLibrary("geometry");
@@ -69,16 +69,21 @@ function RouteComponent() {
 
   useEffect(() => {
     if (dirServ && distMat && geometry) {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/routes`, {
-
-      })
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/routes`, {})
         .then((res) => res.json())
         .then(async (data: PositionType[][]) => {
           const dict = new Map<string, PositionType>();
           data.flat().forEach((point) => {
             dict.set(hashLatLng(point), point);
-          })
-          setPaths(await connectPaths(dirServ, await generateRoute(dirServ, distMat, geometry, [...dict.values()])));
+          });
+          setPaths(
+            await connectPaths(
+              dirServ,
+              await generateRoute(dirServ, distMat, geometry, [
+                ...dict.values(),
+              ])
+            )
+          );
           setMarkers([...dict.values()]);
         });
     }
@@ -119,19 +124,22 @@ function RouteComponent() {
     }
   }, [paths, routes, map]);
 
-  const createBusUUID = () => {
-    const uuid = crypto.randomUUID();
-    setNewBusUUID(uuid);
-    // DASHIELL DO DATABASE
-    return uuid;
+  const getBusKey = async () => {
+    const result = await fetch(
+      import.meta.env.VITE_BACKEND_URL + `/create-key/${0}`
+    );
+    const data = await result.json();
+
+    return setNewBusKey(data.key);
   };
 
-  const createDriverUUID = () => {
-    const uuid = crypto.randomUUID();
-    setNewDriverUUID(uuid);
-    // DASHIELL DO DATABASE
-    console.log(uuid);
-    return uuid;
+  const getDriverKey = async () => {
+    const result = await fetch(
+      import.meta.env.VITE_BACKEND_URL + `/create-key/${1}`
+    );
+    const data = await result.json();
+
+    return setNewDriverKey(data.key);
   };
 
   return (
@@ -159,7 +167,8 @@ function RouteComponent() {
             setMarkers(
               e.detail.latLng ? [...markers, e.detail.latLng] : markers
             );
-          }}>
+          }}
+        >
           {markers.map((m, i) => (
             <AdvancedMarker
               position={m}
@@ -174,7 +183,8 @@ function RouteComponent() {
                   lng: e.latLng!.lng(),
                 };
                 setMarkers([...markers]);
-              }}>
+              }}
+            >
               <Pin
                 background={selectedIdx === i ? "forestGreen" : "red"}
                 glyphColor={selectedIdx === i ? "darkGreen" : "fireBrick"}
@@ -204,7 +214,8 @@ function RouteComponent() {
                   await generateRoute(dirServ!, distMat!, geometry!, markers)
                 )
               );
-            }}>
+            }}
+          >
             Generate Route
           </button>
           <button
@@ -213,9 +224,10 @@ function RouteComponent() {
             onClick={async () => {
               fetch(`${import.meta.env.VITE_BACKEND_URL}/routes`, {
                 method: "POST",
-                body: JSON.stringify(paths!.map((path) => path.stops))
+                body: JSON.stringify(paths!.map((path) => path.stops)),
               });
-            }}>
+            }}
+          >
             Save Current Route
           </button>
 
@@ -235,7 +247,8 @@ function RouteComponent() {
                       ...markers.slice(selectedIdx! + 1, markers.length),
                     ]);
                     setSelectedIdx(null);
-                  }}>
+                  }}
+                >
                   Delete Selected
                 </button>
               </center>
@@ -251,47 +264,51 @@ function RouteComponent() {
                 <TabsList className="grid w-full grid-cols-2 bg-white/10">
                   <TabsTrigger
                     value="bus"
-                    className="data-[state=active]:bg-stone-900">
+                    className="data-[state=active]:bg-stone-900"
+                  >
                     Bus
                   </TabsTrigger>
                   <TabsTrigger
                     value="driver"
-                    className="data-[state=active]:bg-stone-900">
+                    className="data-[state=active]:bg-stone-900"
+                  >
                     Driver
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="bus" className="p-2">
-                  {newBusUUID ? (
+                  {newBusKey ? (
                     <>
                       <h2 className="font-semibold text-lg mt-2">
                         New Bus QR code
                       </h2>
                       <div className="rounded-2xl flex items-center justify-center mt-12 w-fit bg-white/10 p-4 mr-auto ml-auto">
-                        <QRCode value={newBusUUID} className="rounded-lg" />
+                        <QRCode value={newBusKey} className="rounded-lg" />
                       </div>
                     </>
                   ) : (
                     <button
-                      onClick={createBusUUID}
-                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2">
+                      onClick={getBusKey}
+                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2"
+                    >
                       Get new QR Code
                     </button>
                   )}
                 </TabsContent>
                 <TabsContent value="driver" className="p-2">
-                  {newDriverUUID ? (
+                  {newDriverKey ? (
                     <>
                       <h2 className="font-semibold text-lg mt-2">
                         New Driver QR code
                       </h2>
                       <div className="rounded-2xl flex items-center justify-center mt-12 w-fit bg-white/10 p-4 mr-auto ml-auto">
-                        <QRCode value={newDriverUUID} className="rounded-lg" />
+                        <QRCode value={newDriverKey} className="rounded-lg" />
                       </div>
                     </>
                   ) : (
                     <button
-                      onClick={createDriverUUID}
-                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2">
+                      onClick={getDriverKey}
+                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2"
+                    >
                       Get new QR Code
                     </button>
                   )}
@@ -305,7 +322,8 @@ function RouteComponent() {
               logOut();
               router.invalidate();
             }}
-            className="bg-stone-600 p-3 w-full rounded-md hover:bg-stone-700">
+            className="bg-stone-600 p-3 w-full rounded-md hover:bg-stone-700"
+          >
             Log Out
           </button>
         </div>
