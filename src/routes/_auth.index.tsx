@@ -72,18 +72,18 @@ function RouteComponent() {
     if (dirServ && distMat && geometry) {
       fetch(`${import.meta.env.VITE_BACKEND_URL}/routes`, {})
         .then((res) => res.json())
-        .then(async (data: PositionType[][]) => {
+        .then(async (data: { name: string, id: string, stops: PositionType[]}[]) => {
           const dict = new Map<string, PositionType>();
-          data.flat().forEach((point) => {
+          data.flatMap(({ stops }) => stops).forEach((point) => {
             dict.set(hashLatLng(point), point);
           });
           setPaths(
-            await connectPaths(
+            (await connectPaths(
               dirServ,
               await generateRoute(dirServ, distMat, geometry, [
                 ...dict.values(),
               ])
-            )
+            )).map((path, i) => ({...path, name: data[i].name, id: data[i].id }))
           );
           setMarkers([...dict.values()]);
         });
@@ -292,24 +292,15 @@ function RouteComponent() {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="bus" className="p-2">
-                  <Select disabledKeys={["cat", "panda"]}>
+                  <Select>
                     <SelectTrigger />
                     <SelectBody>
                       <SelectSection>
-                        <SelectHeading>Animals</SelectHeading>
+                        <SelectHeading>Route</SelectHeading>
 
-                        <SelectItem>Aardvark</SelectItem>
-                        <SelectItem id="cat">Cat</SelectItem>
-                        <SelectItem>Dog</SelectItem>
-                        <SelectItem>Kangaroo</SelectItem>
-                        <SelectItem id="panda">Panda</SelectItem>
-                        <SelectItem>Snake</SelectItem>
-                      </SelectSection>
-                      <SelectSection>
-                        <SelectHeading>Foods</SelectHeading>
-                        <SelectItem>Pizza</SelectItem>
-                        <SelectItem>Chicken</SelectItem>
-                        <SelectItem>Eggs</SelectItem>
+                        {paths?.map((path, i) => 
+                          <SelectItem key={i} id={path.id}>{path.name}</SelectItem>
+                        )}
                       </SelectSection>
                     </SelectBody>
                   </Select>

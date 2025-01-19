@@ -4,6 +4,8 @@ export interface PositionType {
 };
 
 export interface Path {
+  name: string;
+  id: string;
   directions: google.maps.DirectionsResult[];
   stops: PositionType[];
   dist: number;
@@ -265,6 +267,8 @@ export const generateRoute = async (
 
   return [
     {
+      name: "",
+      id: "",
       directions,
       stops: bestStops,
       dist: minDist,
