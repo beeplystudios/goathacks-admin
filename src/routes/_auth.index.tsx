@@ -16,15 +16,16 @@ import {
   PositionType,
 } from "../utils/algorithm";
 import { QrCodeIcon } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../components/Modal";
+import { Dialog, DialogContent, DialogTrigger } from "../components/Modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/Tabs";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 
 import QRCode from "react-qr-code";
 
@@ -167,8 +168,7 @@ function RouteComponent() {
             setMarkers(
               e.detail.latLng ? [...markers, e.detail.latLng] : markers
             );
-          }}
-        >
+          }}>
           {markers.map((m, i) => (
             <AdvancedMarker
               position={m}
@@ -183,8 +183,7 @@ function RouteComponent() {
                   lng: e.latLng!.lng(),
                 };
                 setMarkers([...markers]);
-              }}
-            >
+              }}>
               <Pin
                 background={selectedIdx === i ? "forestGreen" : "red"}
                 glyphColor={selectedIdx === i ? "darkGreen" : "fireBrick"}
@@ -214,8 +213,7 @@ function RouteComponent() {
                   await generateRoute(dirServ!, distMat!, geometry!, markers)
                 )
               );
-            }}
-          >
+            }}>
             Generate Route
           </button>
           <button
@@ -223,16 +221,17 @@ function RouteComponent() {
             disabled={!paths}
             onClick={async () => {
               const stops = paths!.map((path) => {
-                const pathStops: { loc: PositionType, name: string }[] = [];
+                const pathStops: { loc: PositionType; name: string }[] = [];
                 for (let i = 0; i < path.directions.length; i++) {
                   pathStops.push({
                     loc: path.stops[i],
-                    name: path.directions[i].routes[0].legs[0].start_address
+                    name: path.directions[i].routes[0].legs[0].start_address,
                   });
                 }
                 pathStops.push({
                   loc: path.stops[path.stops.length - 1],
-                  name: path.directions[path.directions.length - 1].routes[0].legs[0].end_address
+                  name: path.directions[path.directions.length - 1].routes[0]
+                    .legs[0].end_address,
                 });
                 return pathStops;
               });
@@ -240,8 +239,7 @@ function RouteComponent() {
                 method: "POST",
                 body: JSON.stringify(stops),
               });
-            }}
-          >
+            }}>
             Save Current Route
           </button>
 
@@ -261,8 +259,7 @@ function RouteComponent() {
                       ...markers.slice(selectedIdx! + 1, markers.length),
                     ]);
                     setSelectedIdx(null);
-                  }}
-                >
+                  }}>
                   Delete Selected
                 </button>
               </center>
@@ -278,18 +275,26 @@ function RouteComponent() {
                 <TabsList className="grid w-full grid-cols-2 bg-white/10">
                   <TabsTrigger
                     value="bus"
-                    className="data-[state=active]:bg-stone-900"
-                  >
+                    className="data-[state=active]:bg-stone-900">
                     Bus
                   </TabsTrigger>
                   <TabsTrigger
                     value="driver"
-                    className="data-[state=active]:bg-stone-900"
-                  >
+                    className="data-[state=active]:bg-stone-900">
                     Driver
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="bus" className="p-2">
+                  <Select>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Choose a bus route" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="dark">Dark</SelectItem>
+                      <SelectItem value="system">System</SelectItem>
+                    </SelectContent>
+                  </Select>
                   {newBusKey ? (
                     <>
                       <h2 className="font-semibold text-lg mt-2">
@@ -302,8 +307,7 @@ function RouteComponent() {
                   ) : (
                     <button
                       onClick={getBusKey}
-                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2"
-                    >
+                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2">
                       Get new QR Code
                     </button>
                   )}
@@ -321,8 +325,7 @@ function RouteComponent() {
                   ) : (
                     <button
                       onClick={getDriverKey}
-                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2"
-                    >
+                      className="bg-stone-300 p-3 w-full rounded-md hover:bg-stone-400 text-black flex items-center justify-center gap-2">
                       Get new QR Code
                     </button>
                   )}
@@ -336,8 +339,7 @@ function RouteComponent() {
               logOut();
               router.invalidate();
             }}
-            className="bg-stone-600 p-3 w-full rounded-md hover:bg-stone-700"
-          >
+            className="bg-stone-600 p-3 w-full rounded-md hover:bg-stone-700">
             Log Out
           </button>
         </div>
