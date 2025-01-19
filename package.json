@@ -23,6 +23,7 @@
   "dependencies": {
     "@tanstack/react-router": "^1.97.3",
     "@tanstack/router-devtools": "^1.97.3",
+    "@vis.gl/react-google-maps": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "react": "^18.3.1",
     "react-aria": "^3.37.0",
