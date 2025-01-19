@@ -3,6 +3,7 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { AuthState, useAuthStore } from "./utils/mall";
 import React from "react";
+import "./global.css";
 
 // Set up a Router instance
 const router = createRouter({

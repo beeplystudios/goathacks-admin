@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    color: theme("colors.white");
+    background-color: theme("colors.neutral.500");
+    -webkit-tap-highlight-color: transparent;
+  }
+}
